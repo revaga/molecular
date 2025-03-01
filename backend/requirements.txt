@@ -4,3 +4,8 @@ PyMuPDF
 spacy
 transformers
 psycopg2-binary
+
+
+##additional reqs
+uvicorn
+torch

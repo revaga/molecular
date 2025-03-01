@@ -1,3 +1,5 @@
+#run with sudo docker-compose up --build
+
 version: '3.8'
 
 services:

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Upload and Chunk Display</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Upload PDF and View Content</h1>
+        <form id="pdf-form">
+            <input type="file" id="pdf-file" accept="application/pdf">
+            <button type="submit">Upload PDF</button>
+        </form>
+
+        <div id="content-display">
+            <!-- Dynamic content will appear here -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

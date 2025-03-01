@@ -1,0 +1,6 @@
+fastapi
+sqlalchemy
+PyMuPDF
+spacy
+transformers
+psycopg2-binary

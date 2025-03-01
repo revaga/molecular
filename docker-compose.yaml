@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile  # Dockerfile for FastAPI (located in /backend)
+    container_name: fastapi_backend
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"  # Expose FastAPI port
+    networks:
+      - app_network
+
+  # PostgreSQL Service
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: target_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage for database
+    networks:
+      - app_network
+
+  # Nginx Reverse Proxy Service
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile  # Dockerfile for Nginx (located in /nginx)
+    container_name: nginx_reverse_proxy
+    depends_on:
+      - backend
+    ports:
+      - "80:80"  # Expose Nginx port
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # Mount frontend static files to Nginx
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:  # Persistent storage for PostgreSQL data
+
+networks:
+  app_network:
+    driver: bridge

@@ -1,13 +1,14 @@
 import math
+import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 
 class NlpService:
     def __init__(self):
-        model_name = "d4data/BioMedNLP-PubMedBERT"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForTokenClassification.from_pretrained(model_name)
-        self.nlp_ner = pipeline("ner", model=self.model, tokenizer=self.tokenizer)
+        model_path = os.path.join(os.path.dirname(__file__), '..', 'models')
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = AutoModelForTokenClassification.from_pretrained(model_path)
+        self.ner_pipeline = pipeline("ner", model=self.model, tokenizer=self.tokenizer)
 
     def calculate_pfs(self, score):
         """
@@ -25,25 +26,20 @@ class NlpService:
         return MY, MN, H
 
     def extract_entities(self, text):
-        entities = self.nlp_ner(text)
-        extracted_entities = []
-
+        entities = self.ner_pipeline(text)
+        result = []
+        
         for entity in entities:
-            # Extract the word and its confidence score
-            entity_data = {
+            score = entity['score']
+            MY, MN, H = self.calculate_pfs(score)
+            
+            result.append({
                 "text": entity['word'],
                 "label": entity['entity'],
-                "score": entity['score'],
-            }
-
-            # Filter entities related to molecular targets (genes, proteins, drugs, etc.)
-            if entity['entity'] in ["GENE", "PROTEIN", "DRUG", "ANTIBODY", "INHIBITOR"]:
-                MY, MN, H = self.calculate_pfs(entity_data['score'])
-
-                entity_data['MY'] = MY
-                entity_data['MN'] = MN
-                entity_data['H'] = H
-
-                extracted_entities.append(entity_data)
-
-        return extracted_entities
+                "score": score,
+                "MY": MY,
+                "MN": MN,
+                "H": H
+            })
+            
+        return result

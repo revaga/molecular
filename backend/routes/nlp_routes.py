@@ -1,14 +1,17 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 from services.nlp_service import NlpService
 
 router = APIRouter()
-
 nlp_service = NlpService()
 
-@router.post("/extract_entities")
-async def extract_entities(text: str):
+class TextRequest(BaseModel):
+    text: str
+
+@router.post("/api/extract_entities")
+async def extract_entities(request: TextRequest):
     # Get the list of extracted entities with their PFS values
-    entities = nlp_service.extract_entities(text)
+    entities = nlp_service.extract_entities(request.text)
     
     # Optionally, aggregate PFS values if needed (e.g., averaging MY, MN, H)
     avg_MY = sum([entity['MY'] for entity in entities]) / len(entities) if entities else 0

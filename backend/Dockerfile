@@ -1,28 +1,19 @@
 # /backend/Dockerfile
 
-# Use Python 3.10 slim image as base
-FROM python:3.10-slim
-
-# Install system dependencies required for PyMuPDF
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Use Python 3.10 as the base image
+FROM python:3.10
 
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy requirements.txt and install dependencies
+# Copy requirements.txt into the container and install the dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend project
+# Copy the entire backend project (services, routes, models, etc.)
 COPY . .
 
-# Create cache directory for transformers
-RUN mkdir -p /root/.cache/huggingface
-
-# Expose port 8000 for FastAPI
+# Expose port 8000 for FastAPI (default is 8000)
 EXPOSE 8000
 
 # Command to run FastAPI app with Uvicorn

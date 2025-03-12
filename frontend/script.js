@@ -1,52 +1,56 @@
-document.getElementById('pdf-form').addEventListener('submit', async function(e) {
+document.getElementById('pdf-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const fileInput = document.getElementById('pdf-file');
     const file = fileInput.files[0];
     
     if (file && file.type === 'application/pdf') {
-        try {
-            await uploadPDF(file);
-        } catch (error) {
-            alert('Error processing PDF: ' + error.message);
-        }
+        readPDF(file);
     } else {
         alert('Please upload a valid PDF file.');
     }
 });
 
-async function uploadPDF(file) {
-    const formData = new FormData();
-    formData.append('file', file);
+async function readPDF(file) {
+    const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+    const totalPages = pdf.numPages;
+    let fullText = '';
 
-    try {
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        
+        textContent.items.forEach(item => {
+            fullText += item.str + ' ';
         });
-
-        if (!response.ok) {
-            throw new Error('Upload failed: ' + response.statusText);
-        }
-
-        const data = await response.json();
-        displaySegments(data.segments);
-    } catch (error) {
-        console.error('Upload error:', error);
-        throw error;
     }
+
+    // Once we have all the text, chunk and display
+    chunkAndDisplayText(fullText);
 }
 
-function displaySegments(segments) {
+function chunkAndDisplayText(text) {
+    const words = text.split(/\s+/); // Split text into words
+    const chunkSize = 50; // 50 words per chunk
+    let currentChunk = '';
+
     // Clear any existing content
     const contentDisplay = document.getElementById('content-display');
     contentDisplay.innerHTML = '';
 
-    // Display each segment
-    segments.forEach(segment => {
-        const chunkElement = document.createElement('div');
-        chunkElement.classList.add('content-chunk');
-        chunkElement.textContent = segment;
-        contentDisplay.appendChild(chunkElement);
-    });
+    // Process and display chunks
+    for (let i = 0; i < words.length; i++) {
+        currentChunk += words[i] + ' ';
+        
+        if ((i + 1) % chunkSize === 0 || i === words.length - 1) {
+            const chunkElement = document.createElement('div');
+            chunkElement.classList.add('content-chunk');
+            chunkElement.textContent = currentChunk;
+            contentDisplay.appendChild(chunkElement);
+            
+            // Clear current chunk and add a slight delay for smooth animation
+            currentChunk = '';
+        }
+    }
 }

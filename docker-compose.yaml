@@ -1,16 +1,16 @@
-#run with sudo docker-compose up --build
-
 version: '3.8'
 
 services:
   # FastAPI Backend Service
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile  # Dockerfile for FastAPI (located in /backend)
     container_name: fastapi_backend
     depends_on:
       - db
     ports:
-      - "8001:8000"  # Expose FastAPI port
+      - "8000:8000"  # Expose FastAPI port
     networks:
       - app_network
 
@@ -29,12 +29,14 @@ services:
 
   # Nginx Reverse Proxy Service
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile  # Dockerfile for Nginx (located in /nginx)
     container_name: nginx_reverse_proxy
     depends_on:
       - backend
     ports:
-      - "8080:80"  # Expose Nginx port
+      - "80:80"  # Expose Nginx port
     volumes:
       - ./frontend:/usr/share/nginx/html  # Mount frontend static files to Nginx
     networks:

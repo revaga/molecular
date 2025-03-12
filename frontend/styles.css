@@ -40,3 +40,94 @@ body {
         transform: translateY(0);
     }
 }
+
+/* Smooth Transitions */
+button, .entity {
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* Loading Animations */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Results Display */
+.entity {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background: #f8f9fa;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.confidence-bar {
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    margin: 5px 0;
+}
+
+.confidence-level {
+    height: 100%;
+    background: #4CAF50;
+    border-radius: 5px;
+}
+
+.uncertainty-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.low-uncertainty { background: #4CAF50; }
+.medium-uncertainty { background: #FFC107; }
+.high-uncertainty { background: #F44336; }
+
+/* Guidelines Display */
+.guideline {
+    margin: 10px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.collapsible {
+    cursor: pointer;
+    padding: 10px;
+    border: none;
+    text-align: left;
+    outline: none;
+    transition: 0.4s;
+}
+
+.active, .collapsible:hover {
+    background-color: #ccc;
+}
+
+.content {
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}

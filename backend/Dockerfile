@@ -1,20 +1,32 @@
 # /backend/Dockerfile
 
-# Use Python 3.10 as the base image
-FROM python:3.10
+# Use official Python image
+FROM python:3.9-slim
 
-# Set the working directory to /app
+# Set working directory
 WORKDIR /app
 
-# Copy requirements.txt into the container and install the dependencies
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire backend project (services, routes, models, etc.)
+# Copy application code
 COPY . .
 
-# Expose port 8000 for FastAPI (default is 8000)
+# Expose port
 EXPOSE 8000
 
-# Command to run FastAPI app with Uvicorn
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV DATABASE_URL=postgresql://user:password@postgres/db
+
+# Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

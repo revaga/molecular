@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from services.nlp_service import NlpService
 
@@ -8,24 +8,30 @@ nlp_service = NlpService()
 class TextRequest(BaseModel):
     text: str
 
-@router.post("/api/extract_entities")
+@router.post("/extract_entities")
 async def extract_entities(request: TextRequest):
-    # Get the list of extracted entities with their PFS values
-    entities = nlp_service.extract_entities(request.text)
-    
-    # Optionally, aggregate PFS values if needed (e.g., averaging MY, MN, H)
-    avg_MY = sum([entity['MY'] for entity in entities]) / len(entities) if entities else 0
-    avg_MN = sum([entity['MN'] for entity in entities]) / len(entities) if entities else 0
-    avg_H = sum([entity['H'] for entity in entities]) / len(entities) if entities else 0
+    try:
+        # Get the list of extracted entities with their PFS values
+        entities = nlp_service.extract_entities_with_pfs(request.text)
+        
+        # Calculate aggregated metrics
+        if entities:
+            avg_MY = sum(entity['MY'] for entity in entities) / len(entities)
+            avg_MN = sum(entity['MN'] for entity in entities) / len(entities)
+            avg_H = sum(entity['hesitancy'] for entity in entities) / len(entities)
+        else:
+            avg_MY = avg_MN = avg_H = 0
 
-    aggregated_result = {
-        "entities": entities,
-        "avg_MY": avg_MY,
-        "avg_MN": avg_MN,
-        "avg_H": avg_H
-    }
-
-    return aggregated_result
+        return {
+            "entities": entities,
+            "aggregated_metrics": {
+                "avg_MY": avg_MY,
+                "avg_MN": avg_MN,
+                "avg_hesitancy": avg_H
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def aggregate_pfs_values(entities_list):

@@ -10,6 +10,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    python3-dev \
+    cmake \
+    build-essential \
+    pkg-config \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
@@ -27,6 +32,5 @@ EXPOSE 8000
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV DATABASE_URL=postgresql://user:password@postgres/db
-
 # Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

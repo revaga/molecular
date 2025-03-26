@@ -1,5 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List, Dict
 from pydantic import BaseModel
+from models import MolecularTarget, Therapy, get_db
 from services.nlp_service import NlpService
 
 router = APIRouter()

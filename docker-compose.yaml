@@ -1,16 +1,28 @@
+#run with sudo docker-compose up --build
+
 version: '3.8'
 
 services:
+  # FastAPI Backend Service
   backend:
     build: ./backend
     container_name: fastapi_backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/models:/app/models:ro
     depends_on:
       - postgres
     environment:
       DATABASE_URL: "postgresql://user:password@postgres/db"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
 
+  # Nginx Frontend Service
   frontend:
     image: nginx:latest
     container_name: nginx_frontend
@@ -22,6 +34,7 @@ services:
     depends_on:
       - backend
 
+  # PostgreSQL Service
   postgres:
     image: postgres:15
     container_name: postgres_db
@@ -29,6 +42,8 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: db
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

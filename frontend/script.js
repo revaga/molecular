@@ -1,3 +1,20 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('guidelines-modal');
+    const closeBtn = document.querySelector('.close');
+    
+    // Close modal when clicking X
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+});
+
 document.getElementById('pdf-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -11,7 +28,7 @@ document.getElementById('pdf-form').addEventListener('submit', async function(e)
     }
     
     // Show loading state
-    contentDisplay.innerHTML = '<div class="loading">Processing PDF...</div>';
+    contentDisplay.innerHTML = '<div class="loading">Processing document...</div>';
     
     try {
         const formData = new FormData();
@@ -27,74 +44,86 @@ document.getElementById('pdf-form').addEventListener('submit', async function(e)
         }
         
         const data = await response.json();
-        
-        // Display results
-        contentDisplay.innerHTML = `
-            <div class="results-container">
-                <div class="text-segments">
-                    <h2>Extracted Text Segments (${data.segment_count})</h2>
-                    <div class="segments">
-                        ${data.text_segments.map((segment, index) => `
-                            <div class="segment">
-                                <h3>Segment ${index + 1}</h3>
-                                <p>${segment}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <div class="entities-container">
-                    <h2>Extracted Entities</h2>
-                    <div class="entities">
-                        ${data.entities.map(entity => `
-                            <div class="entity ${entity.type.toLowerCase()}">
-                                <h3>${entity.text}</h3>
-                                <div class="entity-details">
-                                    <p>Type: ${entity.type}</p>
-                                    <p>Confidence: ${(entity.confidence * 100).toFixed(1)}%</p>
-                                    <p>Membership (MY): ${(entity.MY * 100).toFixed(1)}%</p>
-                                    <p>Non-Membership (MN): ${(entity.MN * 100).toFixed(1)}%</p>
-                                    <p>Hesitancy: ${(entity.hesitancy * 100).toFixed(1)}%</p>
-                                    <p>Linguistic Term: ${entity.linguistic_term}</p>
-                                </div>
-                                ${entity.type === 'GENE' || entity.type === 'PROTEIN' || entity.type === 'PATHWAY' ? `
-                                    <button onclick="getGuidelines('${entity.text}')" class="guidelines-btn">
-                                        Get Guidelines
-                                    </button>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
+        displayResults(data);
+        updateMetrics(data.metrics);
         
     } catch (error) {
-        contentDisplay.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-        console.error('Upload error:', error);
+        contentDisplay.innerHTML = `
+            <div class="error">
+                Error: ${error.message}
+            </div>
+        `;
     }
 });
 
-async function getGuidelines(targetName) {
-    try {
-        const response = await fetch(`/api/guidelines/${encodeURIComponent(targetName)}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch guidelines');
-        }
-        
-        const data = await response.json();
-        const guidelinesModal = document.createElement('div');
-        guidelinesModal.className = 'modal';
-        guidelinesModal.innerHTML = `
-            <div class="modal-content">
-                <h2>Handling Guidelines for ${targetName}</h2>
-                <p>${data.guidelines}</p>
-                <button onclick="this.closest('.modal').remove()">Close</button>
+function displayResults(data) {
+    const contentDisplay = document.getElementById('content-display');
+    
+    let html = '<div class="results-container">';
+    
+    // Display entities with PFS metrics
+    html += '<div class="entities-section">';
+    html += '<h2>Extracted Entities</h2>';
+    
+    data.entities.forEach(entity => {
+        html += `
+            <div class="entity ${entity.entity_type.toLowerCase()}">
+                <div class="entity-header">
+                    <h3>${entity.text}</h3>
+                    <span class="entity-type ${entity.entity_type.toLowerCase()}">${entity.entity_type}</span>
+                </div>
+                
+                <div class="pfs-metrics">
+                    <div class="pfs-metric">
+                        <h4>Membership</h4>
+                        <span>${(entity.my * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="pfs-metric">
+                        <h4>Non-membership</h4>
+                        <span>${(entity.mn * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="pfs-metric">
+                        <h4>Hesitancy</h4>
+                        <span>${(entity.hesitancy * 100).toFixed(1)}%</span>
+                    </div>
+                </div>
+                
+                <button onclick="showGuidelines('${entity.text}', '${entity.entity_type}')" class="guidelines-btn">
+                    View Guidelines
+                </button>
             </div>
         `;
-        document.body.appendChild(guidelinesModal);
+    });
+    
+    html += '</div>';
+    contentDisplay.innerHTML = html;
+}
+
+async function showGuidelines(targetName, entityType) {
+    const modal = document.getElementById('guidelines-modal');
+    const content = document.getElementById('guidelines-content');
+    
+    // Show loading state
+    content.innerHTML = '<div class="loading">Generating guidelines...</div>';
+    modal.style.display = "block";
+    
+    try {
+        const response = await fetch(`/api/guidelines?target=${encodeURIComponent(targetName)}&type=${encodeURIComponent(entityType)}`);
+        const data = await response.json();
         
+        content.innerHTML = `
+            <h3>${targetName}</h3>
+            <div class="guidelines-text">
+                ${data.guidelines}
+            </div>
+        `;
     } catch (error) {
-        alert(`Error fetching guidelines: ${error.message}`);
+        content.innerHTML = `<div class="error">Error generating guidelines: ${error.message}</div>`;
     }
+}
+
+function updateMetrics(metrics) {
+    document.getElementById('precision-value').textContent = `${(metrics.precision * 100).toFixed(1)}%`;
+    document.getElementById('recall-value').textContent = `${(metrics.recall * 100).toFixed(1)}%`;
+    document.getElementById('f1-value').textContent = `${(metrics.f1 * 100).toFixed(1)}%`;
 }

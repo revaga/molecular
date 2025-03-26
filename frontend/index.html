@@ -3,20 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Upload and Chunk Display</title>
+    <title>Molecular Target Analysis</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <div class="container">
-        <h1>Upload PDF and View Content</h1>
-        <form id="pdf-form">
-            <input type="file" id="pdf-file" accept="application/pdf">
-            <button type="submit">Upload PDF</button>
+        <h1>Molecular Target Analysis</h1>
+        
+        <!-- Upload Form -->
+        <form id="pdf-form" class="upload-form">
+            <div class="form-group">
+                <label for="pdf-file">Upload PDF Document</label>
+                <input type="file" id="pdf-file" accept="application/pdf">
+                <button type="submit">Process Document</button>
+            </div>
         </form>
 
+        <!-- Results Container -->
         <div id="content-display">
             <!-- Dynamic content will appear here -->
+        </div>
+
+        <!-- Guidelines Modal -->
+        <div id="guidelines-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Clinical Guidelines</h2>
+                <div id="guidelines-content"></div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div id="performance-metrics" class="metrics-container">
+            <h2>Performance Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <h3>Precision</h3>
+                    <span id="precision-value">-</span>
+                </div>
+                <div class="metric">
+                    <h3>Recall</h3>
+                    <span id="recall-value">-</span>
+                </div>
+                <div class="metric">
+                    <h3>F1 Score</h3>
+                    <span id="f1-value">-</span>
+                </div>
+            </div>
         </div>
     </div>
 

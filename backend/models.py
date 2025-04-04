@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, create_engine
+from sqlalchemy import Column, Integer, String, Float, create_engine, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -43,6 +43,7 @@ class Therapy(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    entity_type = Column(String)
     my = Column(Float)  # Membership degree
     mn = Column(Float)  # Non-membership degree
     hesitancy = Column(Float)  # Hesitancy degree
@@ -53,6 +54,7 @@ class Therapy(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "entity_type": self.entity_type,
             "my": self.my,
             "mn": self.mn,
             "hesitancy": self.hesitancy,

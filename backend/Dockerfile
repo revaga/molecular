@@ -1,7 +1,10 @@
 # /backend/Dockerfile
-
 # Use official Python image
-FROM python:3.9-slim
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV DATABASE_URL=postgresql://user:password@postgres/db
 
 # Set working directory
 WORKDIR /app
@@ -10,7 +13,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
-    python3-dev \
+    python3-pip \
     cmake \
     build-essential \
     pkg-config \
@@ -21,7 +24,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip install -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -29,8 +33,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV DATABASE_URL=postgresql://user:password@postgres/db
 # Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

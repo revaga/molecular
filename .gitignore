@@ -1,0 +1,63 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+.ENV/
+
+# Hugging Face Transformers cache
+~/.cache/huggingface/
+huggingface/
+*.ckpt
+*.safetensors
+
+# System-specific files
+*.swp
+*.bak
+*.tmp
+*.orig
+
+# IDEs and editors
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Logs and temp
+*.log
+*.out
+
+# Node (if relevant)
+node_modules/
+npm-debug.log*
+
+# OS-generated metadata
+Icon?
